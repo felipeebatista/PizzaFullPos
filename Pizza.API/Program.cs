@@ -2,8 +2,13 @@
 
 using Microsoft.EntityFrameworkCore;
 using Pizza.API.Percistence;
+using Steeltoe.Discovery.Client;
+using Steeltoe.Discovery.Consul;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.AddServiceDiscovery(options => options.UseConsul());
 
 builder.Services.AddDbContext<PizzaDbContext>(options => options.UseInMemoryDatabase("pizza"));
 
@@ -17,8 +22,11 @@ builder.Services.AddScoped<EstoqueRepository>();
 
 builder.Services.AddProblemDetails();
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
+app.UseHealthChecks("/health");
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -27,5 +35,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseExceptionHandler("/error");
+
 
 app.Run();
